@@ -1,9 +1,10 @@
-// get page ready 
+// get page ready
 $(document).ready(function () {
   var todayEl = $("#today");
-  var apiKey = "4f1fc5dd04c27357d18d3b5e544675b0";
-  var userInput = $("#user-input");
-  var userInputFormEl = $("city-search-form")
+  var apiKey = "&units=imperial&appid=4f1fc5dd04c27357d18d3b5e544675b0";
+  var userInput = $("#user-input").val().trim();
+  var searchBtnEl = $("#search-btn");
+  var todaysWeatherEl = $(".todays-weather")
   var clearHistoryBtn = $("#clear-history-btn");
   var searchHistory = $("search-history");
 
@@ -13,31 +14,50 @@ $(document).ready(function () {
     todayEl.text(dayAndTimeEL);
   }
   setInterval(displayDayTime, 1000);
-// put function in to api url and return data in usable array send data to get weather function
-function getApiOWM(){
-  var weatherUrl = "api.openweathermap.org/data/2.5/weather?q=" + userInput + apiKey;
-console.log(weatherUrl);
-  fetch(weatherUrl)
-  .then(function(response){
-      return response.json();
-    })
-    .then(function(data){
-        console.log(data);
-        getWeather(data);
-    })
 
-}
-// prevent misloading grab user input and put into getapi function
-function formSubmitHandler (event) {
+  // prevent misloading grab user input and put into getapi function, savehistory and fiveday 
+  function formSubmitHandler(event) {
+    var userInput = $("#user-input").val().trim();
     event.preventDefault();
     if (userInput) {
-        getApiOWM(userInput);
-        $("#user-input").val = "";
+      getApiOWM(userInput);
+      // $("#user-input").val = "";
+      getfiveDayFore(userInput);
+      saveHistory(userInput);
+    } else {
+      alert("Please enter City");
     }
-}
-// on click of form look for function to begin
-userInputFormEl.on("click", formSubmitHandler);
+  }
+
+  // take user input and push into api url and return data in usable array send data to get weather function
+  function getApiOWM(userInput) {
+    var weatherUrl =
+      "https://api.openweathermap.org/data/2.5/weather?q=" + userInput + apiKey;
+    console.log(weatherUrl);
+
+    fetch(weatherUrl)
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (data) {
+        console.log(data);
+        cityWeather(data);
+      });
+  }
+
+  function cityWeather(data){
+  
+
+    // get next 5 day forcast
+var forecast = "https://api.openweathermap.org/data/2.5/forecast?q=" + userInput + apiKey;
+
+
+   }
+  // on click of form look for function to begin
+  searchBtnEl.on("click", formSubmitHandler);
 });
+
+
 
 
 
@@ -56,9 +76,9 @@ userInputFormEl.on("click", formSubmitHandler);
 
 // });
 
-  // set local storage to empty
-  
-  // set local storage to empty
+// set local storage to empty
+
+// set local storage to empty
 //   var savedCities =s JSON.parse(localStorage.getItem("savedCities")) || {};
 
 //   localStorage.setItem("savedCities", JSON.stringify(savedCities));
