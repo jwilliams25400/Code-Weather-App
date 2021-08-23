@@ -4,6 +4,7 @@ $(document).ready(function () {
   var apiKey = "&units=imperial&appid=4f1fc5dd04c27357d18d3b5e544675b0";
   var userInput = $("#user-input").val().trim();
   var searchBtnEl = $("#search-btn");
+  var currDate = moment().format("L");
   var todaysWeatherEl = $(".todays-weather")
   var clearHistoryBtn = $("#clear-history-btn");
   var searchHistory = $("search-history");
@@ -41,18 +42,37 @@ $(document).ready(function () {
       })
       .then(function (data) {
         console.log(data);
-        cityWeather(data);
+        $(".todays-weather").html("");
+        var cityName = $('<h3>');
+        cityName.html(data.name + " " + currDate);
+        // (data.name + " ("currDate")")
+
+        var icon = $("<img>");
+        icon.attr("src", "https://openweather.org/img/wn/" + data.weather[0].icon + ".png").attr("alt",data.weather[0].description);
+        
+        var temp = $("<p>");
+        temp.html("Temperature: " + data.main.temp + "°F");
+
+        var wind = $("<p>");
+        wind.html("Wind speed: " + data.wind.speed + " mph");
+
+        var humidity = $("<p>");
+        humidity.html("Humidity: " + data.main.humidity + "%");
+// append retrieve info to today weather container
+        $(".todays-weather").append(cityName, icon, temp, wind, humidity);
+
       });
   }
 
-  function cityWeather(data){
+ 
+    
   
 
     // get next 5 day forcast
 var forecast = "https://api.openweathermap.org/data/2.5/forecast?q=" + userInput + apiKey;
 
 
-   }
+   
   // on click of form look for function to begin
   searchBtnEl.on("click", formSubmitHandler);
 });
