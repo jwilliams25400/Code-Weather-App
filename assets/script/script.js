@@ -9,7 +9,7 @@ $(document).ready(function () {
   var currDate = moment().format("L");
   var todaysWeatherEl = $(".todays-weather");
   var clearHistoryBtn = $("#clear-history-btn");
-  var searchHistory = $("search-history");
+  // var searchHistory = $("search-history");
 
   // set date and time in header
   function displayDayTime() {
@@ -26,7 +26,8 @@ $(document).ready(function () {
       getApiOWM(userInput);
       // $("#user-input").val = "";
       getfiveDayFore(userInput);
-      saveHistory(userInput);
+      searchHistory(userInput);
+      displayHistory(userInput);
     } else {
       alert("Please enter City");
     }
@@ -51,10 +52,7 @@ $(document).ready(function () {
 
         var icon = $("<img>");
         icon
-          .attr(
-            "src",
-            "https://openweather.org/img/wn/" + data.weather[0].icon
-          )
+          .attr("src", "https://openweather.org/img/wn/" + data.weather[0].icon)
           .attr("alt", data.weather[0].description);
 
         var temp = $("<p>");
@@ -126,29 +124,34 @@ $(document).ready(function () {
       })
       .then(function (fiveDay) {
         $(".forecast-five").html("");
-        for (var i = 0; i < 40 ; i+=8) {
+        for (var i = 0; i < 40; i += 8) {
           var forecastCard = $("<div>");
-          
 
           var foreDateDiv = $("<div>");
           foreDateDiv.html(
-            "<h4>" + moment(fiveDay.list[i].dt * 1000).format("M/D")+"</h4>"
+            "<h4>" + moment(fiveDay.list[i].dt * 1000).format("M/D") + "</h4>"
           );
           console.log(fiveDay);
 
           var foreiconDiv = $("<div>");
           foreiconDiv.html(
-          "<img src= 'https://openweather.org/img/wn/" + fiveDay.list[i].weather.icon + ".png'>"
+            "<img src= 'https://openweather.org/img/wn/" +
+              fiveDay.list[i].weather.icon +
+              ".png'>"
           );
 
           var foreTempDiv = $("<div>");
           foreTempDiv.html("Temperature: " + fiveDay.list[i].temp + "°F");
 
           var foreHumidityDiv = $("<div>");
-          foreHumidityDiv.html("Humidity: " + fiveDay.list[i].main.humidity + "%");
+          foreHumidityDiv.html(
+            "Humidity: " + fiveDay.list[i].main.humidity + "%"
+          );
 
           var foreWindDiv = $("<div>");
-          foreWindDiv.html("Wind speed: " + fiveDay.list[i].wind.speed + " mph");
+          foreWindDiv.html(
+            "Wind speed: " + fiveDay.list[i].wind.speed + " mph"
+          );
 
           forecastCard.append(
             foreDateDiv,
@@ -162,9 +165,24 @@ $(document).ready(function () {
         }
       });
   }
+// create history search list
+
+function displayHistory(userInput) {
+  $(".search-history").html("");
+  var newlySearchedbtn = $("button");
+  newlySearchedbtn.html(userInput);
+  newlySearchedbtn.attr("type", "submit")
+
+  searchLi.append(newlySearchedbtn);
+  $(".search-history").prepend(searchLi);
+  
+newlySearchedbtn.on("click",getApiOWM)
+}
+
+
   // save search to local storage and display under the word search history.
-  function saveHistory() {
-    localStorage.setItem("searchedCities", JSON.stringify(city));
+  function searchHistory() {
+    localStorage.setItem("searchedCities", JSON.stringify(userInput));
   }
   function startUp() {
     if (localStorage.getItem("searchedCities") === null) {
@@ -173,6 +191,8 @@ $(document).ready(function () {
       var searchedCities = JSON.parse(localStorage.getItem("searchedCities"));
       for (var i = 0; i < searchedCities.length; i++) {
         var city = searchedCities[i];
+        console.log(city);
+
       }
     }
   }
