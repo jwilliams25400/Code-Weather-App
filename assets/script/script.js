@@ -24,7 +24,6 @@ $(document).ready(function () {
     event.preventDefault();
     if (userInput) {
       getApiOWM(userInput);
-      // $("#user-input").val = "";
       getfiveDayFore(userInput);
       searchHistory(userInput);
       displayHistory(userInput);
@@ -48,12 +47,18 @@ $(document).ready(function () {
         $(".todays-weather").html("");
         var cityName = $("<h3>");
         cityName.html(data.name + " " + currDate);
-        // (data.name + " ("currDate")")
-
+    
         var icon = $("<img>");
+        switch(data.weather[0].main) {
+          case "Clear":
+          answer= icon.attr("src", "./assets/images/")
+        }
+        //need case for rain, snow, thunderstorms, clouds **********
+
         icon
           .attr("src", "https://openweather.org/img/wn/" + data.weather[0].icon)
           .attr("alt", data.weather[0].main);
+          
 
         var temp = $("<p>");
         temp.html("Temperature: " + data.main.temp + "°F");
@@ -63,7 +68,7 @@ $(document).ready(function () {
 
         var humidity = $("<p>");
         humidity.html("Humidity: " + data.main.humidity + "%");
-        
+
         // append retrieve info to today weather container
         $(".todays-weather").append(cityName, icon, temp, wind, humidity);
 
