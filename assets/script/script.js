@@ -53,7 +53,7 @@ $(document).ready(function () {
         var icon = $("<img>");
         icon
           .attr("src", "https://openweather.org/img/wn/" + data.weather[0].icon)
-          .attr("alt", data.weather[0].description);
+          .attr("alt", data.weather[0].main);
 
         var temp = $("<p>");
         temp.html("Temperature: " + data.main.temp + "°F");
@@ -63,6 +63,7 @@ $(document).ready(function () {
 
         var humidity = $("<p>");
         humidity.html("Humidity: " + data.main.humidity + "%");
+        
         // append retrieve info to today weather container
         $(".todays-weather").append(cityName, icon, temp, wind, humidity);
 
@@ -73,7 +74,7 @@ $(document).ready(function () {
   function getUv(data) {
     var uvApiKey = "4f1fc5dd04c27357d18d3b5e544675b0";
     var uvUrl =
-      "https://api.openweathermap.org/data/2.5//onecall?lat=" +
+      "https://api.openweathermap.org/data/2.5/onecall?lat=" +
       data.coord.lat +
       "&lon=" +
       data.coord.lon +
@@ -86,27 +87,29 @@ $(document).ready(function () {
       })
       .then(function (uvdata) {
         console.log("uvdata", uvdata);
-        var uvIndex = $("<p>");
+        var uvIndex = $("<div>");
         uvIndex.attr("id", "uv-color");
-        uvIndex.text("UVI: " + uvdata.current.uvi);
-
-        var uvHeat = uvdata.current.uvi;
-        if (uvHeat == 0 && uvHeat <= 3) {
-          $("#uv-color").css("background-color", "green").addClass("uv-low");
-        } else if (uvHeat > 3 && uvHeat < 5) {
-          $("#uv-color")
-            .css("background-color", "yellow")
-            .addClass("uv-moderate");
-        } else if (uvHeat > 5 && uvHeat < 7) {
-          $("#uv-color").css("background-color", "orange").addClass("uv-high");
-        } else if (uvHeat > 7 && uvHeat <= 10) {
-          $("#uv-color").css("background-color", "red").addClass("uv-veryhigh");
-        } else {
-          $("#uv-color")
-            .css("background-color", "red")
-            .addClass("uv-extremelydangerous");
-        }
+        uvIndex.html("UVI: " + uvdata.daily[0].uvi);
+        console.log(uvdata.daily[0].uvi);
         $(".todays-weather").append(uvIndex);
+
+        // var uvHeat = uvdata.daily[0].uvi;
+        if (uvIndex <= 3) {
+          $("#uv-color").css("background-color", "green");
+          $("#uv-color").addClass("uv-low");
+        } else if (uvIndex > 3 && uvIndex < 5) {
+          $("#uv-color").css("background-color", "yellow");
+          $("#uv-color").addClass("uv-moderate");
+        } else if (uvIndex > 5 && uvIndex < 7) {
+          $("#uv-color").css("background-color", "orange");
+          $("#uv-color").addClass("uv-high");
+        } else if (uvIndex > 7 && uvIndex <= 10) {
+          $("#uv-color").css("background-color", "red");
+          $("#uv-color").addClass("uv-veryhigh");
+        } else {
+          $("#uv-color").css("background-color", "red");
+          $("#uv-color").addClass("uv-extremelydangerous");
+        }
       });
   }
 
@@ -123,6 +126,7 @@ $(document).ready(function () {
         return response.json();
       })
       .then(function (fiveDay) {
+        console.log(fiveDay);
         $(".forecast-five").html("");
         for (var i = 0; i < 40; i += 8) {
           var forecastCard = $("<div>");
@@ -131,15 +135,16 @@ $(document).ready(function () {
           foreDateDiv.html(
             "<h4>" + moment(fiveDay.list[i].dt * 1000).format("M/D") + "</h4>"
           );
-          console.log(fiveDay);
+          
 
           var foreiconDiv = $("<div>");
           foreiconDiv.html(
             "<img src= 'https://openweather.org/img/wn/" +
-              fiveDay.list[i].weather.icon +
-              ".png'>"
-          );
-
+              fiveDay.list[i].weather[0].icon +
+              ".png'>" 
+              );
+              // foreiconDiv.attr("alt", fiveDay.list[i].weather[0].main) INEED THIS 
+             
           var foreTempDiv = $("<div>");
           foreTempDiv.html("Temperature: " + fiveDay.list[i].temp + "°F");
 
@@ -165,20 +170,20 @@ $(document).ready(function () {
         }
       });
   }
-// create history search list
+  // create history search list
 
-function displayHistory(userInput) {
-  $(".search-history").html("");
-  var newlySearchedbtn = $("button");
-  newlySearchedbtn.html(userInput);
-  newlySearchedbtn.attr("type", "submit")
+  function displayHistory(userInput) {
+    $(".search-history").html("");
+    var newlySearchedbtn = $("<button>");
+    newlySearchedbtn.html(userInput);
+    newlySearchedbtn.attr("type", "submit");
+    console.log(userInput);
 
-  searchLi.append(newlySearchedbtn);
-  $(".search-history").prepend(searchLi);
-  
-newlySearchedbtn.on("click",getApiOWM)
-}
+    // searchLi.append(newlySearchedbtn);
+    $(".search-history").append(newlySearchedbtn);
 
+    newlySearchedbtn.on("click", getApiOWM);
+  }
 
   // save search to local storage and display under the word search history.
   function searchHistory() {
@@ -192,12 +197,17 @@ newlySearchedbtn.on("click",getApiOWM)
       for (var i = 0; i < searchedCities.length; i++) {
         var city = searchedCities[i];
         console.log(city);
-
       }
     }
   }
-
+  function clearHistory() {
+    localStorage.clear();
+    $(".search-history").html("");
+    $("#user-input").html("");
+  }
   // on click of form look for function to begin
   searchBtnEl.on("click", formSubmitHandler);
   startUp();
+
+  clearHistoryBtn.on("click", clearHistory);
 });
