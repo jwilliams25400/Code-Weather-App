@@ -24,9 +24,8 @@ $(document).ready(function () {
     event.preventDefault();
     if (userInput) {
       getApiOWM(userInput);
-      getfiveDayFore(userInput);
-      searchHistory(userInput);
       displayHistory(userInput);
+      $("user-input").html("");
     } else {
       alert("Please enter City");
     }
@@ -47,18 +46,18 @@ $(document).ready(function () {
         $(".todays-weather").html("");
         var cityName = $("<h3>");
         cityName.html(data.name + " " + currDate);
-    
-        var icon = $("<img>");
-        switch(data.weather[0].main) {
-          case "Clear":
-          answer= icon.attr("src", "./assets/images/")
-        }
-        //need case for rain, snow, thunderstorms, clouds **********
 
+        var icon = $("<img>");
         icon
-          .attr("src", "https://openweather.org/img/wn/" + data.weather[0].icon)
+          .attr(
+            "src",
+            "http://openweathermap.org/img/wn/" +
+              data.weather[0].icon +
+              "@2x.png"
+          )
+
           .attr("alt", data.weather[0].main);
-          
+        console.log(icon);
 
         var temp = $("<p>");
         temp.html("Temperature: " + data.main.temp + "°F");
@@ -73,6 +72,7 @@ $(document).ready(function () {
         $(".todays-weather").append(cityName, icon, temp, wind, humidity);
 
         getUv(data);
+        getfiveDayFore(data);///////////////// 
       });
   }
   //obtain uv and color
@@ -85,6 +85,7 @@ $(document).ready(function () {
       data.coord.lon +
       "&exclude=minutely,hourly,alerts&units=imperial&appid=" +
       uvApiKey;
+      console.log(uvUrl);
 
     fetch(uvUrl)
       .then(function (response) {
@@ -99,69 +100,67 @@ $(document).ready(function () {
         $(".todays-weather").append(uvIndex);
 
         // var uvHeat = uvdata.daily[0].uvi;
-        if (uvIndex <= 3) {
+        if ( uvdata.daily[0].uvi <= 3) {
           $("#uv-color").css("background-color", "green");
           $("#uv-color").addClass("uv-low");
-        } else if (uvIndex > 3 && uvIndex < 5) {
+        } else if (uvdata.daily[0].uvi > 3 && uvdata.daily[0].uvi < 5) {
           $("#uv-color").css("background-color", "yellow");
           $("#uv-color").addClass("uv-moderate");
-        } else if (uvIndex > 5 && uvIndex < 7) {
+        } else if (uvdata.daily[0].uvi > 5 && uvdata.daily[0].uvi < 7) {
           $("#uv-color").css("background-color", "orange");
           $("#uv-color").addClass("uv-high");
-        } else if (uvIndex > 7 && uvIndex <= 10) {
+        } else if (uvdata.daily[0].uvi > 7 && uvdata.daily[0].uvi <= 10) {
           $("#uv-color").css("background-color", "red");
           $("#uv-color").addClass("uv-veryhigh");
         } else {
           $("#uv-color").css("background-color", "red");
           $("#uv-color").addClass("uv-extremelydangerous");
         }
+        console.log(uvIndex);
       });
   }
 
   // get next 5 day forcast
-  function getfiveDayFore(userInput) {
-    var forecast =
-      "https://api.openweathermap.org/data/2.5/forecast?q=" +
-      userInput +
-      "&appid=" +
-      uvApiKey;
+function getfiveDayFore (fivedaydata){
+  var forecasturl = "https://api.openweathermap.org/data/2.5/onecall?lat=" +
+   fivedaydata.coord.lat +
+  "&lon=" + 
+  fivedaydata.coord.lon + 
+  "&exclude=minutely,hourly,alerts&units=imperial&appid=" + 
+  uvApiKey;
 
-    fetch(forecast)
+     
+    fetch(forecasturl)
       .then(function (response) {
         return response.json();
       })
       .then(function (fiveDay) {
         console.log(fiveDay);
         $(".forecast-five").html("");
-        for (var i = 0; i < 40; i += 8) {
+        for (var i = 1; i < 6; i ++){
           var forecastCard = $("<div>");
 
           var foreDateDiv = $("<div>");
           foreDateDiv.html(
-            "<h4>" + moment(fiveDay.list[i].dt * 1000).format("M/D") + "</h4>"
+            "<h4>" + moment(fiveDay.daily[i].dt * 1000).format("M/D") + "<h4>"
           );
-          
 
           var foreiconDiv = $("<div>");
           foreiconDiv.html(
-            "<img src= 'https://openweather.org/img/wn/" +
-              fiveDay.list[i].weather[0].icon +
-              ".png'>" 
-              );
-              // foreiconDiv.attr("alt", fiveDay.list[i].weather[0].main) INEED THIS 
-             
+            "<img src= 'http://openweathermap.org/img/wn/" +
+              fiveDay.daily[i].weather[0].icon +
+              ".png'>"
+          );
+
           var foreTempDiv = $("<div>");
-          foreTempDiv.html("Temperature: " + fiveDay.list[i].temp + "°F");
+          foreTempDiv.html("Temperature: " + fiveDay.daily[i].temp.day + "°F");
 
           var foreHumidityDiv = $("<div>");
-          foreHumidityDiv.html(
-            "Humidity: " + fiveDay.list[i].main.humidity + "%"
-          );
+          foreHumidityDiv.html("Humidity: " + fiveDay.daily[i].humidity + "%");
+
 
           var foreWindDiv = $("<div>");
-          foreWindDiv.html(
-            "Wind speed: " + fiveDay.list[i].wind.speed + " mph"
-          );
+          foreWindDiv.html("Wind speed: " + fiveDay.daily[i].wind_speed + " mph");
 
           forecastCard.append(
             foreDateDiv,
@@ -178,33 +177,56 @@ $(document).ready(function () {
   // create history search list
 
   function displayHistory(userInput) {
-    $(".search-history").html("");
-    var newlySearchedbtn = $("<button>");
-    newlySearchedbtn.html(userInput);
-    newlySearchedbtn.attr("type", "submit");
-    console.log(userInput);
+    var citybtn = $("<button>");
+    citybtn.html(userInput);
+    citybtn.attr("type", "submit");
+    citybtn.attr("class", "searchHisBtn");
+    citybtn.attr("city-name");
+    var savedCities = JSON.parse(localStorage.getItem("searchedCities")) || [];
+    savedCities.push(userInput);
+    localStorage.setItem("searchedCities", JSON.stringify(savedCities));
 
-    // searchLi.append(newlySearchedbtn);
-    $(".search-history").append(newlySearchedbtn);
+    // search.append(newlySearchedbtn);
+    $(".search-history").append(citybtn);
 
-    newlySearchedbtn.on("click", getApiOWM);
+    citybtn.on("click", function (event) {
+      var reSearchCity = citybtn.text();
+      if (reSearchCity) {
+        getApiOWM(reSearchCity);
+      }
+    });
   }
 
   // save search to local storage and display under the word search history.
   function searchHistory() {
-    localStorage.setItem("searchedCities", JSON.stringify(userInput));
-  }
-  function startUp() {
-    if (localStorage.getItem("searchedCities") === null) {
-      return;
+    var savedCities = localStorage.getItem("searchedCities");
+    var city = [];
+    if (!savedCities) {
+      city = [];
     } else {
-      var searchedCities = JSON.parse(localStorage.getItem("searchedCities"));
-      for (var i = 0; i < searchedCities.length; i++) {
-        var city = searchedCities[i];
+      city = JSON.parse(savedCities);
+    }
+    if (city.length > 0) {
+      for (var i = 0; i < city.length; i++) {
+        var citybtn = $("<button>").html("");
+        citybtn.html(city[i]);
+        $(".search-history").append(citybtn);
+      }
+
+      localStorage.setItem("searchedCities", JSON.stringify(city));
+    }
+  }
+
+  function startUp() {
+      if (localStorage.getItem("searchedCities") === null) {
+        return;
+      } else {
+        var searchedCities = JSON.parse(localStorage.getItem("searchedCities"));
+        var city = searchedCities[0];
         console.log(city);
       }
     }
-  }
+  
   function clearHistory() {
     localStorage.clear();
     $(".search-history").html("");
@@ -212,7 +234,8 @@ $(document).ready(function () {
   }
   // on click of form look for function to begin
   searchBtnEl.on("click", formSubmitHandler);
-  startUp();
 
   clearHistoryBtn.on("click", clearHistory);
+
+  searchHistory();
 });
