@@ -23,3 +23,9 @@
 ### box 2 showing the forecast over the next 5 days 
 #### both boxes holding the weather conditions will display date, and icon of the type of weather expected, current temperature in farenheight, wind speeds and humidity#### User Input field
 #### save button
+
+![](images/weatherDashboard/jpg)
+
+
+
+https://jwilliams25400.github.io/Code-Weather-App/
