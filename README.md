@@ -24,7 +24,7 @@
 #### both boxes holding the weather conditions will display date, and icon of the type of weather expected, current temperature in farenheight, wind speeds and humidity#### User Input field
 #### save button
 
-![Weather Dashboad](C:\Users\jwill\OneDrive\Desktop\Homework\Code-Weather-App\assets\images\weatherDashboard.jpg)
+![Weather Dashboard](images\weatherDashboard.jpg)
 
 
 
